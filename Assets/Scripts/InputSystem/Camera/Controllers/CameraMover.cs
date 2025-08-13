@@ -1,4 +1,5 @@
-﻿using InputSystem.Interfaces;
+﻿using InputSystem.CameraControllers.Interfaces;
+using InputSystem.Interfaces;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -9,11 +10,14 @@ namespace InputSystem.CameraControllers
         private const float TAP_TIME_THRESHOLD = 0.2f;
         private const float TAP_DISTANCE_THRESHOLD = 50f;
         private const float DRUG_MAGNITUDE = 0.1f;
+        private const float ZOOM_COEFICENT = 0.1f;
         
         public event UnityAction<Vector3> m_OnScreenTap;
     
         [Header("Camera Settings")]
         [SerializeField] private float m_MoveSpeed = 10f;
+        [SerializeField] private float m_VerticalMoveMultiplier = 2f;
+        [SerializeField] private float m_HorizontalMoveMultiplier = 1f;
         [SerializeField] private float m_ZoomSpeed = 2f;
         [SerializeField] private float m_MinZoom = 2f;
         [SerializeField] private float m_MaxZoom = 8f;
@@ -36,11 +40,13 @@ namespace InputSystem.CameraControllers
         private Vector3 m_TouchStartPosition;
         
         private ICameraMovementAction m_CameraMovementAction;
+        private IScreenTapAction m_ScreenTapAction;
         
-        public void Init(Camera camera, ICameraMovementAction cameraMovementAction)
+        public void Init(Camera camera, ICameraMovementAction cameraMovementAction, IScreenTapAction tapAction)
         {
             m_CameraComponent = camera;
             m_CameraMovementAction = cameraMovementAction;
+            m_ScreenTapAction = tapAction;
             SetupIsometricView();
             SubscribeInputEvents();
         }
@@ -109,23 +115,7 @@ namespace InputSystem.CameraControllers
     
         private void HandleScreenTap(Vector3 screenPosition)
         {
-            Ray ray = m_CameraComponent.ScreenPointToRay(screenPosition);
-            
-            if (Physics.Raycast(ray, out RaycastHit hit))
-            {
-                m_OnScreenTap?.Invoke(hit.point);
-            }
-            else
-            {
-                Vector3 worldPoint = GetWorldPointOnPlane(ray);
-                m_OnScreenTap?.Invoke(worldPoint);
-            }
-        }
-    
-        private Vector3 GetWorldPointOnPlane(Ray ray)
-        {
-            float distance = -ray.origin.y / ray.direction.y;
-            return ray.origin + ray.direction * distance;
+            m_ScreenTapAction.OnScreenTap(screenPosition);
         }
     
         private void MoveCamera(Vector3 delta)
@@ -173,8 +163,8 @@ namespace InputSystem.CameraControllers
                 worldUnitsPerScreenPixel = (halfHeight * 2f) / screenHeight;
             }
             
-            float deltaX = screenDelta.x * worldUnitsPerScreenPixel * m_MoveSpeed * 0.1f;
-            float deltaY = screenDelta.y * worldUnitsPerScreenPixel * m_MoveSpeed * 0.1f;
+            float deltaX = screenDelta.x * worldUnitsPerScreenPixel * m_MoveSpeed * ZOOM_COEFICENT * m_HorizontalMoveMultiplier;
+            float deltaY = screenDelta.y * worldUnitsPerScreenPixel * m_MoveSpeed * ZOOM_COEFICENT * m_VerticalMoveMultiplier;
 
             Vector3 worldDelta = new Vector3(
                 deltaX,
@@ -183,6 +173,11 @@ namespace InputSystem.CameraControllers
             );
 
             return worldDelta;
+        }
+
+        private void OnDestroy()
+        {
+            m_OnScreenTap = null;
         }
     }
 }
