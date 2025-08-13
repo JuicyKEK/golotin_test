@@ -1,4 +1,5 @@
-﻿using InputSystem.CameraControllers.Interfaces;
+﻿using System;
+using InputSystem.CameraControllers.Interfaces;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
@@ -70,6 +71,14 @@ namespace Player.Controllers
                 m_CharacterAnimationController.PlayInteractAnimation();
                 m_CollbackMove.Invoke();
                 m_CollbackMove = null;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (m_MoveCoroutine != null)
+            {
+                StopCoroutine(m_MoveCoroutine);
             }
         }
     }
