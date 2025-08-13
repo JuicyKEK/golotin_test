@@ -1,0 +1,65 @@
+﻿using InputSystem.Interfaces;
+using UnityEngine;
+
+namespace InputSystem.Controllers
+{
+    public class TouchHandleInputAction : IHandleInputAction
+    {
+        private const float ZoomSpeedCoefficient = 0.01f;
+        
+        public Vector3 IsTouchStart()
+        {
+            if(Input.GetTouch(0).phase == TouchPhase.Began);
+            {
+                return Input.GetTouch(0).position;
+            }
+            
+            return Vector2.zero;
+        }
+
+        public Vector3 IsTouchEnd()
+        {
+            if(Input.GetTouch(0).phase == TouchPhase.Ended);
+            {
+                return Input.GetTouch(0).position;
+            }
+            
+            return Vector2.zero;
+        }
+
+        public Vector3 IsDrag()
+        {
+            if(Input.GetTouch(0).phase == TouchPhase.Moved);
+            {
+                return Input.GetTouch(0).position;
+            }
+            
+            return Vector2.zero;
+        }
+
+        public float IsScroll()
+        {
+            if (Input.touchCount == 2)
+            {
+                return HandlePinchZoom();
+            }
+            
+            return 0f;
+        }
+        
+        private float HandlePinchZoom()
+        {
+            Touch touch1 = Input.GetTouch(0);
+            Touch touch2 = Input.GetTouch(1);
+            
+            float currentDistance = Vector2.Distance(touch1.position, touch2.position);
+            
+            Vector2 touch1PrevPos = touch1.position - touch1.deltaPosition;
+            Vector2 touch2PrevPos = touch2.position - touch2.deltaPosition;
+            float prevDistance = Vector2.Distance(touch1PrevPos, touch2PrevPos);
+            
+            float deltaDistance = currentDistance - prevDistance;
+            return -deltaDistance * ZoomSpeedCoefficient;
+        }
+    }
+}
