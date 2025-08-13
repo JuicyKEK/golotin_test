@@ -1,5 +1,6 @@
 ﻿using InputSystem.CameraControllers.Interfaces;
 using InputSystem.Interfaces;
+using Player;
 using UnityEngine;
 using UnityEngine.Events;
 

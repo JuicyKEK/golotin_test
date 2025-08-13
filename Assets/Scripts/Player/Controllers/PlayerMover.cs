@@ -10,13 +10,16 @@ namespace Player.Controllers
     {
         [SerializeField] private NavMeshAgent m_Agent;
 
+        private ICharacterAnimationController m_CharacterAnimationController;
         private IScreenTapActionAdd m_ScreenTapActionAdd;
         private Camera m_CameraComponent;
         private UnityAction m_CollbackMove;
         private Coroutine m_MoveCoroutine;
         
-        public void Init(Camera camera, IScreenTapActionAdd screenTapActionAdd)
+        public void Init(Camera camera, IScreenTapActionAdd screenTapActionAdd,
+            ICharacterAnimationController animationController)
         {
+            m_CharacterAnimationController = animationController;
             m_CameraComponent = camera;
             m_ScreenTapActionAdd = screenTapActionAdd;
             m_ScreenTapActionAdd.OnScreenTapSubscribe(Move);
@@ -42,6 +45,7 @@ namespace Player.Controllers
                     }
                     
                     m_Agent.SetDestination(hit.point);
+                    m_CharacterAnimationController.PlayWalkAnimation();
                     m_MoveCoroutine = StartCoroutine(WaitForDestinationReached());
                 }
             }
@@ -60,8 +64,10 @@ namespace Player.Controllers
 
         private void CollBackMove()
         {
+            m_CharacterAnimationController.PlayIdleAnimation();
             if(m_CollbackMove != null)
             {
+                m_CharacterAnimationController.PlayInteractAnimation();
                 m_CollbackMove.Invoke();
                 m_CollbackMove = null;
             }
