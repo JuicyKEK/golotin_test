@@ -1,8 +1,13 @@
-﻿using InputSystem.CameraControllers.Interfaces;
+﻿using System;
+using InputSystem.CameraControllers.Interfaces;
+using InputSystem.Controllers;
+using Player.Interfaces;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 using System.Collections;
+using Windows.Interfaces;
+using Zenject;
 
 namespace Player.Controllers
 {
@@ -10,23 +15,32 @@ namespace Player.Controllers
     {
         [SerializeField] private NavMeshAgent m_Agent;
 
+        private IWindowsController m_WindowsController;
         private ICharacterAnimationController m_CharacterAnimationController;
         private IScreenTapActionAdd m_ScreenTapActionAdd;
         private Camera m_CameraComponent;
         private UnityAction m_CollbackMove;
         private Coroutine m_MoveCoroutine;
         
-        public void Init(Camera camera, IScreenTapActionAdd screenTapActionAdd,
-            ICharacterAnimationController animationController)
+        [Inject]
+        public void Construct(Camera camera, IScreenTapActionAdd screenTapActionAdd,
+            ICharacterAnimationController animationController,
+            IWindowsController windowsController)
         {
             m_CharacterAnimationController = animationController;
             m_CameraComponent = camera;
             m_ScreenTapActionAdd = screenTapActionAdd;
+            m_WindowsController = windowsController;
             m_ScreenTapActionAdd.OnScreenTapSubscribe(Move);
         }
         
         private void Move(Vector3 position)
         {
+            if (m_WindowsController.IsOpenWindow)
+            {
+                return;
+            }
+            
             if (m_Agent != null)
             {
                 m_CollbackMove = null;
@@ -70,6 +84,14 @@ namespace Player.Controllers
                 m_CharacterAnimationController.PlayInteractAnimation();
                 m_CollbackMove.Invoke();
                 m_CollbackMove = null;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (m_MoveCoroutine != null)
+            {
+                StopCoroutine(m_MoveCoroutine);
             }
         }
     }

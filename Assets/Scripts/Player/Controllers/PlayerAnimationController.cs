@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Player.Interfaces;
+using UnityEngine;
 
 namespace Player.Controllers
 {
