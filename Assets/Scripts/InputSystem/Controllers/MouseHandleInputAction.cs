@@ -40,7 +40,7 @@ namespace InputSystem.Controllers
             float scroll = Input.GetAxis("Mouse ScrollWheel");
             if (Mathf.Abs(scroll) > 0.01f)
             {
-                return -scroll;
+                return scroll;
             }
             
             return 0f;

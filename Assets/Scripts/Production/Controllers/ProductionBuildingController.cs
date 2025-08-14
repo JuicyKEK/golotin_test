@@ -10,7 +10,7 @@ namespace Production.Controllers
 {
     public class ProductionBuildingController : MonoBehaviour, IProductionBuildingController
     {
-        private const float UPDATE_TIMER_INTERVAL = 0.1f;
+        private const float UPDATE_TIMER_INTERVAL = 0.2f;
         
         [SerializeField] private List<ProductionBuilding> m_ProductionBuildings;
         [SerializeField] private ProductionBuildingsSO m_ProductionBuildingsData;
@@ -19,9 +19,11 @@ namespace Production.Controllers
         private Dictionary<string, float> m_ResourceTimers;
         private Dictionary<string, ProductionBuildingData> m_BuildingDataByResourceName;
         private Coroutine m_MainTimerCoroutine;
+        private List<string> m_CachedResourceNames;
+        private bool m_IsInitialized = false;
         
         private IResourceController m_ResourceController;
-        
+
         [Inject]
         public void Construct(IResourceController resourceController)
         {
@@ -37,9 +39,10 @@ namespace Production.Controllers
 
         private void InitializeBuildingsDictionary()
         {
-            m_BuildingsByResourceName = new Dictionary<string, ProductionBuilding>();
-            m_ResourceTimers = new Dictionary<string, float>();
-            m_BuildingDataByResourceName = new Dictionary<string, ProductionBuildingData>();
+            int buildingCount = m_ProductionBuildingsData.ProductionBuildings.Count;
+            m_BuildingsByResourceName = new Dictionary<string, ProductionBuilding>(buildingCount);
+            m_ResourceTimers = new Dictionary<string, float>(buildingCount);
+            m_BuildingDataByResourceName = new Dictionary<string, ProductionBuildingData>(buildingCount);
         }
 
         private void StartMainTimer()
@@ -53,18 +56,22 @@ namespace Production.Controllers
                 }
             }
             
+            m_CachedResourceNames = new List<string>(m_ResourceTimers.Keys);
+            
             m_MainTimerCoroutine = StartCoroutine(MainTimer());
         }
 
         private IEnumerator MainTimer()
         {
+            var waitForSeconds = new WaitForSeconds(UPDATE_TIMER_INTERVAL);
+            
             while (true)
             {
-                yield return new WaitForSeconds(UPDATE_TIMER_INTERVAL);
+                yield return waitForSeconds;
                 
-                var resourceNames = new List<string>(m_ResourceTimers.Keys);
-                foreach (var resourceName in resourceNames)
+                for (int i = 0; i < m_CachedResourceNames.Count; i++)
                 {
+                    string resourceName = m_CachedResourceNames[i];
                     m_ResourceTimers[resourceName] -= UPDATE_TIMER_INTERVAL;
                     
                     if (m_ResourceTimers[resourceName] <= 0f)
@@ -115,6 +122,7 @@ namespace Production.Controllers
             if (m_MainTimerCoroutine != null)
             {
                 StopCoroutine(m_MainTimerCoroutine);
+                m_MainTimerCoroutine = null;
             }
         }
     }
