@@ -13,6 +13,8 @@ using Production.Controllers;
 using Production.Interfaces;
 using Resource.Controllers;
 using Resource.Interfaces;
+using Settings.Controllers;
+using Settings.Interfaces;
 using UnityEngine;
 using Zenject;
 
@@ -31,6 +33,7 @@ namespace GameMain.Installers
         [SerializeField] private PlayerMover m_PlayerMover;
         [SerializeField] private PerformanceOptimizer m_PerformanceOptimizer;
         [SerializeField] private Camera m_Camera;
+        [SerializeField] private MusicVolumeController m_MusicVolumeController;
 
         public override void InstallBindings()
         {
@@ -39,6 +42,7 @@ namespace GameMain.Installers
             Container.Bind<IResourceController>().To<ResourceController>().FromInstance(m_ResourceController).AsSingle();
             Container.Bind<IPlayerInventory>().To<PlayerInventory>().FromInstance(m_PlayerInventory).AsSingle();
             Container.Bind<IResourcesViewAdd>().To<ResourcesViewController>().FromInstance(m_ResourcesViewController).AsSingle();
+            Container.Bind<IMusicVolume>().To<MusicVolumeController>().FromInstance(m_MusicVolumeController).AsSingle();
             Container.Bind<ICameraMover>().To<CameraMover>().FromInstance(m_CameraMover).AsSingle();
             Container.Bind<Camera>().FromInstance(m_Camera).AsSingle();
             Container.Bind<IPerformanceOptimizer>().To<PerformanceOptimizer>().FromInstance(m_PerformanceOptimizer).AsSingle();

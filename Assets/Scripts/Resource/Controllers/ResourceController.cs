@@ -23,7 +23,7 @@ namespace Resource.Controllers
         
         public void ShowAddResource(string resourceName, int amountAdd)
         {
-            m_ResourceWindowsShow.ShowWindows(resourceName, m_PlayerInventory.GetResourceCount(resourceName),
+            m_ResourceWindowsShow.ShowResourceWindows(resourceName, m_PlayerInventory.GetResourceCount(resourceName),
                 amountAdd, () => AddResource(resourceName, amountAdd));
         }
 
