@@ -2,7 +2,9 @@
 using System.Collections;
 using Data.SO;
 using Production.Interfaces;
+using Resource.Interfaces;
 using UnityEngine;
+using Zenject;
 
 namespace Production.Controllers
 {
@@ -17,6 +19,14 @@ namespace Production.Controllers
         private Dictionary<string, float> m_ResourceTimers;
         private Dictionary<string, ProductionBuildingData> m_BuildingDataByResourceName;
         private Coroutine m_MainTimerCoroutine;
+        
+        private IResourceController m_ResourceController;
+        
+        [Inject]
+        public void Construct(IResourceController resourceController)
+        {
+            m_ResourceController = resourceController;
+        }
         
         public void Init()
         {
@@ -82,7 +92,8 @@ namespace Production.Controllers
                 }
                 
                 var resourceName = m_ProductionBuildingsData.ProductionBuildings[i].ResourceName;
-                m_ProductionBuildings[i].Init(resourceName);
+                int index = i;
+                m_ProductionBuildings[i].Init(resourceName, () => OnBuildingInteract(index));
                 m_BuildingsByResourceName[resourceName] = m_ProductionBuildings[i];
             }
             
@@ -90,6 +101,13 @@ namespace Production.Controllers
             {
                 Debug.LogError("ProductionBuildingsData is less than in ProductionBuildings on scene");
             }
+        }
+
+        private void OnBuildingInteract(int buildingIndex)
+        {
+            m_ResourceController.ShowAddResource(m_ProductionBuildings[buildingIndex].ResourceName,
+                m_ProductionBuildings[buildingIndex].ResourceCount);
+            m_ProductionBuildings[buildingIndex].SetResourceCount(0);
         }
 
         private void OnDestroy()

@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 using System.Collections;
+using Windows.Interfaces;
 using Zenject;
 
 namespace Player.Controllers
@@ -14,6 +15,7 @@ namespace Player.Controllers
     {
         [SerializeField] private NavMeshAgent m_Agent;
 
+        private IWindowsController m_WindowsController;
         private ICharacterAnimationController m_CharacterAnimationController;
         private IScreenTapActionAdd m_ScreenTapActionAdd;
         private Camera m_CameraComponent;
@@ -22,16 +24,23 @@ namespace Player.Controllers
         
         [Inject]
         public void Construct(Camera camera, IScreenTapActionAdd screenTapActionAdd,
-            ICharacterAnimationController animationController)
+            ICharacterAnimationController animationController,
+            IWindowsController windowsController)
         {
             m_CharacterAnimationController = animationController;
             m_CameraComponent = camera;
             m_ScreenTapActionAdd = screenTapActionAdd;
+            m_WindowsController = windowsController;
             m_ScreenTapActionAdd.OnScreenTapSubscribe(Move);
         }
         
         private void Move(Vector3 position)
         {
+            if (m_WindowsController.IsOpenWindow)
+            {
+                return;
+            }
+            
             if (m_Agent != null)
             {
                 m_CollbackMove = null;

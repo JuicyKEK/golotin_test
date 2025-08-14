@@ -1,4 +1,5 @@
-﻿using InputSystem.CameraControllers.Interfaces;
+﻿using Windows.Interfaces;
+using InputSystem.CameraControllers.Interfaces;
 using InputSystem.Controllers;
 using InputSystem.Interfaces;
 using Player;
@@ -44,13 +45,16 @@ namespace InputSystem.CameraControllers
         
         private ICameraMovementAction m_CameraMovementAction;
         private IScreenTapAction m_ScreenTapAction;
+        private IWindowsController m_WindowsController;
 
         [Inject]
-        public void Construct(Camera camera, ICameraMovementAction cameraMovementAction, IScreenTapAction tapAction)
+        public void Construct(Camera camera, ICameraMovementAction cameraMovementAction, IScreenTapAction tapAction,
+            IWindowsController windowsController)
         {
             m_CameraComponent = camera;
             m_CameraMovementAction = cameraMovementAction;
             m_ScreenTapAction = tapAction;
+            m_WindowsController = windowsController;
         }
         
         public void Init()
@@ -84,6 +88,11 @@ namespace InputSystem.CameraControllers
         
         private void OnTouchBegan(Vector3 screenPosition)
         {
+            if (m_WindowsController.IsOpenWindow)
+            {
+                return;
+            }
+            
             m_TouchStartTime = Time.time;
             m_TouchStartPosition = screenPosition;
             m_LastScreenPosition = screenPosition;
@@ -92,6 +101,11 @@ namespace InputSystem.CameraControllers
     
         private void OnTouchMoved(Vector3 screenPosition)
         {
+            if (m_WindowsController.IsOpenWindow)
+            {
+                return;
+            }
+            
             Vector3 screenDelta = m_LastScreenPosition - screenPosition;
             
             if (Vector3.Distance(m_TouchStartPosition, screenPosition) > TAP_DISTANCE_THRESHOLD)
@@ -110,6 +124,11 @@ namespace InputSystem.CameraControllers
     
         private void OnTouchEnded(Vector3 screenPosition)
         {
+            if (m_WindowsController.IsOpenWindow)
+            {
+                return;
+            }
+            
             float touchDuration = Time.time - m_TouchStartTime;
             float touchDistance = Vector3.Distance(m_TouchStartPosition, screenPosition);
             
