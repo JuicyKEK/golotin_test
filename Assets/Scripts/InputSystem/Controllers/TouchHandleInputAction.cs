@@ -71,7 +71,7 @@ namespace InputSystem.Controllers
             
             float deltaDistance = currentDistance - prevDistance;
             
-            return deltaDistance * ZoomSpeedCoefficient;
+            return deltaDistance * ZoomSpeedCoefficient * -1;
         }
     }
 }
