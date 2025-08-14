@@ -1,9 +1,12 @@
 ﻿using System;
 using InputSystem.CameraControllers.Interfaces;
+using InputSystem.Controllers;
+using Player.Interfaces;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 using System.Collections;
+using Zenject;
 
 namespace Player.Controllers
 {
@@ -17,7 +20,8 @@ namespace Player.Controllers
         private UnityAction m_CollbackMove;
         private Coroutine m_MoveCoroutine;
         
-        public void Init(Camera camera, IScreenTapActionAdd screenTapActionAdd,
+        [Inject]
+        public void Construct(Camera camera, IScreenTapActionAdd screenTapActionAdd,
             ICharacterAnimationController animationController)
         {
             m_CharacterAnimationController = animationController;

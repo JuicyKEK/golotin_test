@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Collections;
 using Data.SO;
+using Production.Interfaces;
 using UnityEngine;
 
 namespace Production.Controllers
 {
-    public class ProductionBuildingController : MonoBehaviour
+    public class ProductionBuildingController : MonoBehaviour, IProductionBuildingController
     {
         private const float UPDATE_TIMER_INTERVAL = 0.1f;
         

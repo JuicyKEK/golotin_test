@@ -1,12 +1,14 @@
 ﻿using InputSystem.CameraControllers.Interfaces;
+using InputSystem.Controllers;
 using InputSystem.Interfaces;
 using Player;
 using UnityEngine;
 using UnityEngine.Events;
+using Zenject;
 
 namespace InputSystem.CameraControllers
 {
-    public class CameraMover : MonoBehaviour
+    public class CameraMover : MonoBehaviour, ICameraMover
     {
         private const float TAP_TIME_THRESHOLD = 0.2f;
         private const float TAP_DISTANCE_THRESHOLD = 50f;
@@ -42,12 +44,17 @@ namespace InputSystem.CameraControllers
         
         private ICameraMovementAction m_CameraMovementAction;
         private IScreenTapAction m_ScreenTapAction;
-        
-        public void Init(Camera camera, ICameraMovementAction cameraMovementAction, IScreenTapAction tapAction)
+
+        [Inject]
+        public void Construct(Camera camera, ICameraMovementAction cameraMovementAction, IScreenTapAction tapAction)
         {
             m_CameraComponent = camera;
             m_CameraMovementAction = cameraMovementAction;
             m_ScreenTapAction = tapAction;
+        }
+        
+        public void Init()
+        {
             SetupIsometricView();
             SubscribeInputEvents();
         }
