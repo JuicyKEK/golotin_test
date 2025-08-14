@@ -1,12 +1,102 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Collections;
+using Data.SO;
+using UnityEngine;
 
 namespace Production.Controllers
 {
     public class ProductionBuildingController : MonoBehaviour
     {
+        private const float UPDATE_TIMER_INTERVAL = 0.1f;
+        
+        [SerializeField] private List<ProductionBuilding> m_ProductionBuildings;
+        [SerializeField] private ProductionBuildingsSO m_ProductionBuildingsData;
+        
+        private Dictionary<string, ProductionBuilding> m_BuildingsByResourceName;
+        private Dictionary<string, float> m_ResourceTimers;
+        private Dictionary<string, ProductionBuildingData> m_BuildingDataByResourceName;
+        private Coroutine m_MainTimerCoroutine;
+        
         public void Init()
         {
+            InitializeBuildingsDictionary();
+            CreateProductionBuildings();
+            StartMainTimer();
+        }
+
+        private void InitializeBuildingsDictionary()
+        {
+            m_BuildingsByResourceName = new Dictionary<string, ProductionBuilding>();
+            m_ResourceTimers = new Dictionary<string, float>();
+            m_BuildingDataByResourceName = new Dictionary<string, ProductionBuildingData>();
+        }
+
+        private void StartMainTimer()
+        {
+            foreach (var buildingData in m_ProductionBuildingsData.ProductionBuildings)
+            {
+                if (m_BuildingsByResourceName.ContainsKey(buildingData.ResourceName))
+                {
+                    m_ResourceTimers[buildingData.ResourceName] = buildingData.SecondsBetweenAddResource;
+                    m_BuildingDataByResourceName[buildingData.ResourceName] = buildingData;
+                }
+            }
             
+            m_MainTimerCoroutine = StartCoroutine(MainTimer());
+        }
+
+        private IEnumerator MainTimer()
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(UPDATE_TIMER_INTERVAL);
+                
+                var resourceNames = new List<string>(m_ResourceTimers.Keys);
+                foreach (var resourceName in resourceNames)
+                {
+                    m_ResourceTimers[resourceName] -= UPDATE_TIMER_INTERVAL;
+                    
+                    if (m_ResourceTimers[resourceName] <= 0f)
+                    {
+                        if (m_BuildingsByResourceName.TryGetValue(resourceName, out var building) &&
+                            m_BuildingDataByResourceName.TryGetValue(resourceName, out var buildingData))
+                        {
+                            var currentCount = building.GetResourceCount();
+                            building.SetResourceCount(currentCount + buildingData.ResourceAddCount);
+                            m_ResourceTimers[resourceName] = buildingData.SecondsBetweenAddResource;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void CreateProductionBuildings()
+        {
+            for (int i = 0; i < m_ProductionBuildingsData.ProductionBuildings.Count; i++)
+            {
+                if(m_ProductionBuildings.Count <= i)
+                {
+                    Debug.LogError("ProductionBuildings on scene is less than in ProductionBuildingsData");
+                    return;
+                }
+                
+                var resourceName = m_ProductionBuildingsData.ProductionBuildings[i].ResourceName;
+                m_ProductionBuildings[i].Init(resourceName);
+                m_BuildingsByResourceName[resourceName] = m_ProductionBuildings[i];
+            }
+            
+            if(m_ProductionBuildings.Count > m_ProductionBuildingsData.ProductionBuildings.Count)
+            {
+                Debug.LogError("ProductionBuildingsData is less than in ProductionBuildings on scene");
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (m_MainTimerCoroutine != null)
+            {
+                StopCoroutine(m_MainTimerCoroutine);
+            }
         }
     }
 }

@@ -1,12 +1,14 @@
 ﻿using InputSystem.CameraControllers;
 using InputSystem.Controllers;
 using Player.Controllers;
+using Production.Controllers;
 using UnityEngine;
 
 namespace GameMain.Controllers
 {
     public class GameStarter : MonoBehaviour
     {
+        [SerializeField] private ProductionBuildingController m_ProductionBuildingController;
         [SerializeField] private PlayerAnimationController m_PlayerAnimationController;
         [SerializeField] private InputController m_InputController;
         [SerializeField] private CameraMover m_CameraMover;
@@ -20,6 +22,7 @@ namespace GameMain.Controllers
             m_InputController.Init();
             m_CameraMover.Init(m_Camera, m_InputController, m_ScreenTapController);
             m_PlayerMover.Init(m_Camera, m_ScreenTapController, m_PlayerAnimationController);
+            m_ProductionBuildingController.Init();
         }
     }
 }
