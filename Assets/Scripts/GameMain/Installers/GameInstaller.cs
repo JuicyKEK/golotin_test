@@ -26,6 +26,7 @@ namespace GameMain.Installers
         [SerializeField] private WindowsController m_WindowsController;
         [SerializeField] private InputController m_InputController;
         [SerializeField] private PlayerInventory m_PlayerInventory;
+        [SerializeField] private ResourcesViewController m_ResourcesViewController;
         [SerializeField] private CameraMover m_CameraMover;
         [SerializeField] private PlayerMover m_PlayerMover;
         [SerializeField] private PerformanceOptimizer m_PerformanceOptimizer;
@@ -37,6 +38,7 @@ namespace GameMain.Installers
             Container.Bind<ICharacterAnimationController>().To<PlayerAnimationController>().FromInstance(m_PlayerAnimationController).AsSingle();
             Container.Bind<IResourceController>().To<ResourceController>().FromInstance(m_ResourceController).AsSingle();
             Container.Bind<IPlayerInventory>().To<PlayerInventory>().FromInstance(m_PlayerInventory).AsSingle();
+            Container.Bind<IResourcesViewAdd>().To<ResourcesViewController>().FromInstance(m_ResourcesViewController).AsSingle();
             Container.Bind<ICameraMover>().To<CameraMover>().FromInstance(m_CameraMover).AsSingle();
             Container.Bind<Camera>().FromInstance(m_Camera).AsSingle();
             Container.Bind<IPerformanceOptimizer>().To<PerformanceOptimizer>().FromInstance(m_PerformanceOptimizer).AsSingle();

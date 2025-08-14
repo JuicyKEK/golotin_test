@@ -10,12 +10,15 @@ namespace Resource.Controllers
     {
         private IResourceWindowsShow m_ResourceWindowsShow;
         private IPlayerInventory m_PlayerInventory;
+        private IResourcesViewAdd m_ResourcesViewController;
         
         [Inject]
-        public void Construct(IResourceWindowsShow resourceWindowsShow, IPlayerInventory playerInventory)
+        public void Construct(IResourceWindowsShow resourceWindowsShow, IPlayerInventory playerInventory,
+            IResourcesViewAdd resourcesViewAdd)
         {
             m_ResourceWindowsShow = resourceWindowsShow;
             m_PlayerInventory = playerInventory;
+            m_ResourcesViewController = resourcesViewAdd;
         }
         
         public void ShowAddResource(string resourceName, int amountAdd)
@@ -26,7 +29,10 @@ namespace Resource.Controllers
 
         public void AddResource(string resourceName, int amount)
         {
+            m_ResourcesViewController.UpdateResourceView(resourceName, 
+                m_PlayerInventory.GetResourceCount(resourceName) + amount);
             m_PlayerInventory.AddResource(resourceName, amount);
+            
         }
     }
 }
