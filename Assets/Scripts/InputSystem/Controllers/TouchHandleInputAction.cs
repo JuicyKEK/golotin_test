@@ -7,34 +7,45 @@ namespace InputSystem.Controllers
     {
         private const float ZoomSpeedCoefficient = 0.01f;
         
+        private TouchPhase m_LastTouchPhase = TouchPhase.Canceled;
+        private Vector3 m_LastTouchPosition = Vector3.zero;
+        private bool m_HasValidTouch = false;
+        
         public Vector3 IsTouchStart()
         {
-            if(Input.GetTouch(0).phase == TouchPhase.Began);
-            {
-                return Input.GetTouch(0).position;
-            }
+            if (!UpdateTouchState()) return Vector3.zero;
             
-            return Vector2.zero;
+            return m_LastTouchPhase == TouchPhase.Began ? m_LastTouchPosition : Vector3.zero;
         }
 
         public Vector3 IsTouchEnd()
         {
-            if(Input.GetTouch(0).phase == TouchPhase.Ended);
-            {
-                return Input.GetTouch(0).position;
-            }
+            if (!UpdateTouchState()) return Vector3.zero;
             
-            return Vector2.zero;
+            return m_LastTouchPhase == TouchPhase.Ended ? m_LastTouchPosition : Vector3.zero;
         }
 
         public Vector3 IsDrag()
         {
-            if(Input.GetTouch(0).phase == TouchPhase.Moved);
-            {
-                return Input.GetTouch(0).position;
-            }
+            if (!UpdateTouchState()) return Vector3.zero;
             
-            return Vector2.zero;
+            return m_LastTouchPhase == TouchPhase.Moved ? m_LastTouchPosition : Vector3.zero;
+        }
+        
+        private bool UpdateTouchState()
+        {
+            if (Input.touchCount <= 0)
+            {
+                m_HasValidTouch = false;
+                return false;
+            }
+
+            Touch touch = Input.GetTouch(0);
+            m_LastTouchPhase = touch.phase;
+            m_LastTouchPosition = touch.position;
+            m_HasValidTouch = true;
+            
+            return true;
         }
 
         public float IsScroll()
@@ -59,7 +70,8 @@ namespace InputSystem.Controllers
             float prevDistance = Vector2.Distance(touch1PrevPos, touch2PrevPos);
             
             float deltaDistance = currentDistance - prevDistance;
-            return -deltaDistance * ZoomSpeedCoefficient;
+            
+            return deltaDistance * ZoomSpeedCoefficient;
         }
     }
 }
